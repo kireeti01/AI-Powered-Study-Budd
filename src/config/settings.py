@@ -42,7 +42,7 @@ STREAMLIT_CONFIG = {
 }
 
 # AI Model Configuration
-GEMINI_MODEL = "gemini-pro"
+GEMINI_MODEL = "gemini-1.5-flash"
 GEMINI_TEMPERATURE = 0.7
 GEMINI_MAX_OUTPUT_TOKENS = 2000
 
