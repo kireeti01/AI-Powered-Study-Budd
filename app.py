@@ -102,116 +102,115 @@ class StreamlitApp:
     def show_home(self):
         """Display home page"""
         st.markdown("<div class='main-header'>", unsafe_allow_html=True)
+
         st.title("📚 AI Study Buddy")
+
         st.markdown(
-            "Your personal AI-powered learning companion | Master any subject efficiently",
-            help="Powered by Google Gemini API"
+            "Your personal AI-powered learning companion | Master any subject efficiently"
         )
+
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.write("---")
 
-        # Feature overview
-        col1, col2, col3 = st.columns(3)
+        cards = [
+            (
+                "💡 Topic Explainer",
+                "Get AI-powered explanations in simple language.",
+                "💡 Topic Explainer"
+            ),
+            (
+                "📝 Notes Summarizer",
+                "Upload documents and get summaries.",
+                "📝 Notes Summarizer"
+            ),
+            (
+                "🎯 Quiz Generator",
+                "Create interactive quizzes.",
+                "🎯 Quiz Generator"
+            ),
+            (
+                "🃏 Flashcard Generator",
+                "Generate smart flashcards.",
+                "🃏 Flashcard Generator"
+            ),
+            (
+                "📅 Study Planner",
+                "Create personalized schedules.",
+                "📅 Study Planner"
+            ),
+            (
+                "❓ Ask Questions",
+                "Ask questions from your notes.",
+                "❓ Ask Questions"
+            )
+        ]
 
-        with col1:
-            st.markdown("""
-                <div class='feature-card'>
-                    <h3>💡 Topic Explainer</h3>
-                    <p>Get AI-powered explanations in simple language with real-world examples.</p>
-                </div>
-            """, unsafe_allow_html=True)
+        cols = st.columns(3)
 
-        with col2:
-            st.markdown("""
-                <div class='feature-card'>
-                    <h3>📝 Notes Summarizer</h3>
-                    <p>Upload documents and get concise summaries with key points highlighted.</p>
-                </div>
-            """, unsafe_allow_html=True)
+        for index, card in enumerate(cards):
+            with cols[index % 3]:
+                st.markdown(
+                    f"""
+                    <div class='feature-card'>
+                    <h3>{card[0]}</h3>
+                    <p>{card[1]}</p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
-        with col3:
-            st.markdown("""
-                <div class='feature-card'>
-                    <h3>🎯 Quiz Generator</h3>
-                    <p>Create interactive quizzes to test your knowledge on any topic.</p>
-                </div>
-            """, unsafe_allow_html=True)
+                if st.button(
+                    f"Open {card[0]}",
+                    key=f"home_{index}",
+                    use_container_width=True
+                ):
+                    st.session_state.selected_page = card[2]
+                    st.rerun()
 
-        st.write("")
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.markdown("""
-                <div class='feature-card'>
-                    <h3>🃏 Flashcards</h3>
-                    <p>Generate smart flashcards for efficient spaced learning.</p>
-                </div>
-            """, unsafe_allow_html=True)
-
-        with col2:
-            st.markdown("""
-                <div class='feature-card'>
-                    <h3>📅 Study Planner</h3>
-                    <p>Get personalized study schedules optimized for your exam date.</p>
-                </div>
-            """, unsafe_allow_html=True)
-
-        with col3:
-            st.markdown("""
-                <div class='feature-card'>
-                    <h3>❓ Ask Questions</h3>
-                    <p>Ask questions about your notes and get context-aware answers.</p>
-                </div>
-            """, unsafe_allow_html=True)
+            if index == 2:
+                cols = st.columns(3)
 
         st.write("---")
 
-        # Quick start guide
         st.subheader("🚀 Quick Start")
 
-        with st.expander("How to get started?", expanded=True):
-            st.markdown("""
-            1. **Select a feature** from the sidebar
-            2. **Enter your topic** or **upload a file**
-            3. **Configure options** as needed
-            4. **Click the action button** to generate content
-            5. **Download or review** your results
-
-            **Tips:**
-            - Use specific topics for better results
-            - Keep questions clear and focused
-            - Try different difficulty levels
-            - Download flashcards for offline study
-            """)
+        with st.expander(
+            "How to get started?",
+            expanded=True
+        ):
+            st.markdown(
+            """
+            1. Select any feature above
+            2. Enter your topic or upload notes
+            3. Generate AI content
+            4. Review and download results
+            """
+            )
 
     def show_topic_explainer(self):
         """Display Topic Explainer"""
         st.header("💡 Topic Explainer")
-        st.write("Get AI-powered explanations of any topic in simple, beginner-friendly language.")
+        st.write("Get a clear, AI-powered explanation of any topic.")
 
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            topic = st.text_input(
-                "Enter a topic to explain:",
-                placeholder="e.g., Photosynthesis, Machine Learning, Quantum Physics",
-                help="Enter any topic you want to understand"
-            )
-
-        with col2:
-            difficulty = st.selectbox(
-                "Difficulty Level:",
-                ["beginner", "intermediate", "advanced"],
-                index=0
-            )
+        topic = st.text_input("Enter a topic you'd like explained:")
 
         col1, col2 = st.columns(2)
         with col1:
-            include_examples = st.checkbox("Include Examples", value=True)
+            explanation_level = st.selectbox(
+                "Explanation Level:",
+                ["beginner", "intermediate", "advanced"],
+                index=0,
+                help="Choose how technical the explanation should be"
+            )
         with col2:
-            include_applications = st.checkbox("Include Applications", value=True)
+            explanation_style = st.selectbox(
+                "Style:",
+                ["simple", "detailed", "with_examples"],
+                index=2
+            )
 
-        if st.button("📚 Explain Topic", use_container_width=True, key="explain_btn"):
+        if st.button("💡 Explain Topic", use_container_width=True, key="explain_btn"):
             if not topic.strip():
                 st.error("❌ Please enter a topic")
             else:
@@ -219,37 +218,33 @@ class StreamlitApp:
                     try:
                         result = self.topic_explainer.explain_topic(
                             topic=topic,
-                            difficulty=difficulty,
-                            include_examples=include_examples,
-                            include_applications=include_applications
+                            level=explanation_level,
+                            style=explanation_style
                         )
 
-                        st.success("✅ Explanation generated!")
+                        st.success("✅ Explanation ready!")
 
-                        st.markdown("### Full Explanation")
-                        st.write(result.get("full_explanation", ""))
+                        st.markdown("### 📖 Explanation")
+                        st.write(result.get("explanation", ""))
 
-                        if "key_phrases" in result and result["key_phrases"]:
-                            st.markdown("### 🔑 Key Phrases")
-                            for phrase in result["key_phrases"]:
-                                st.write(f"• {phrase}")
+                        if result.get("examples"):
+                            st.markdown("### 💡 Examples")
+                            for example in result["examples"]:
+                                st.write(f"• {example}")
+
+                        if result.get("related_topics"):
+                            st.markdown("### 🔗 Related Topics")
+                            st.write(", ".join(result["related_topics"]))
 
                         st.download_button(
                             label="📥 Download Explanation",
-                            data=result.get("full_explanation", ""),
+                            data=result.get("explanation", ""),
                             file_name=f"{topic.replace(' ', '_')}_explanation.txt",
                             mime="text/plain"
                         )
 
                     except Exception as e:
                         st.error(f"❌ Error: {str(e)}")
-
-        with st.expander("🔧 Advanced Options"):
-            if st.button("Compare Topics"):
-                st.info("Feature coming soon!")
-
-            if st.button("Step-by-Step Breakdown"):
-                st.info("Feature coming soon!")
 
     def show_notes_summarizer(self):
         """Display Notes Summarizer"""
@@ -413,11 +408,11 @@ class StreamlitApp:
                                 num_questions=num_questions
                             )
 
+                            temp_path.unlink()
+
                             st.session_state.current_quiz = quiz
                             st.success("✅ Quiz created!")
                             st.rerun()
-
-                            temp_path.unlink()
 
                         except Exception as e:
                             st.error(f"❌ Error: {str(e)}")
@@ -544,11 +539,11 @@ class StreamlitApp:
                                 num_cards=num_cards
                             )
 
+                            temp_path.unlink()
+
                             st.session_state.flashcards = result
                             st.success("✅ Flashcards created!")
                             st.rerun()
-
-                            temp_path.unlink()
 
                         except Exception as e:
                             st.error(f"❌ Error: {str(e)}")
@@ -797,42 +792,59 @@ class StreamlitApp:
             st.info("👆 Upload study material and click Load Material first")
 
     def run(self):
-        """Run the Streamlit application"""
-        # Sidebar navigation
+        """Run Streamlit application"""
         with st.sidebar:
             st.title("📚 AI Study Buddy")
+
             st.write("---")
+
+            default_page = "🏠 Home"
+
+            if "selected_page" in st.session_state:
+                default_page = st.session_state.selected_page
+
+            pages = [
+                "🏠 Home",
+                "💡 Topic Explainer",
+                "📝 Notes Summarizer",
+                "🎯 Quiz Generator",
+                "🃏 Flashcard Generator",
+                "📅 Study Planner",
+                "❓ Ask Questions"
+            ]
 
             page = st.radio(
                 "Navigate to:",
-                [
-                    "🏠 Home",
-                    "💡 Topic Explainer",
-                    "📝 Notes Summarizer",
-                    "🎯 Quiz Generator",
-                    "🃏 Flashcard Generator",
-                    "📅 Study Planner",
-                    "❓ Ask Questions"
-                ]
+                pages,
+                index=pages.index(default_page)
             )
 
             st.write("---")
-            st.caption("Powered by Groq | Built by Yogendra")
-            st.caption(f"© {datetime.now().year} AI Study Buddy")
 
-        # Route to correct page
+            st.caption("Powered by Groq | Built by Yogendra")
+
+            st.caption(
+                f"© {datetime.now().year} AI Study Buddy"
+            )
+
         if page == "🏠 Home":
             self.show_home()
+
         elif page == "💡 Topic Explainer":
             self.show_topic_explainer()
+
         elif page == "📝 Notes Summarizer":
             self.show_notes_summarizer()
+
         elif page == "🎯 Quiz Generator":
             self.show_quiz_generator()
+
         elif page == "🃏 Flashcard Generator":
             self.show_flashcard_generator()
+
         elif page == "📅 Study Planner":
             self.show_study_planner()
+
         elif page == "❓ Ask Questions":
             self.show_qa_engine()
 
