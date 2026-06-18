@@ -35,9 +35,8 @@ class QuizGenerator:
 
 
     def _convert_to_dict(self, response):
-
         """
-        Safely convert Gemini response to dictionary
+        Convert AI response safely into dictionary
         """
 
         if isinstance(response, dict):
@@ -47,9 +46,27 @@ class QuizGenerator:
         if isinstance(response, str):
 
             try:
-                return json.loads(response)
 
-            except:
+                cleaned = response.replace(
+                    "```json", ""
+                )
+
+                cleaned = cleaned.replace(
+                    "```", ""
+                )
+
+                cleaned = cleaned.strip()
+
+
+                return json.loads(cleaned)
+
+
+            except Exception as e:
+
+                logger.error(
+                    f"JSON conversion failed: {e}"
+                )
+
 
                 return {
 
@@ -59,12 +76,21 @@ class QuizGenerator:
                     "questions":[
 
                         {
+
                             "id":1,
-                            "type":"short_answer",
-                            "question":response,
+
+                            "type":
+                                "short_answer",
+
+                            "question":
+                                response,
+
                             "options":[],
+
                             "correct_answer":"",
+
                             "explanation":""
+
                         }
 
                     ]
@@ -81,7 +107,6 @@ class QuizGenerator:
 
 
 
-
     def generate_quiz(
             self,
             topic:str,
@@ -90,14 +115,12 @@ class QuizGenerator:
             difficulty="medium"
     ):
 
-
         try:
-
 
             Validators.is_valid_topic(topic)
 
 
-            prompt=f"""
+            prompt = f"""
 
 You are an expert teacher.
 
@@ -114,45 +137,34 @@ Number of questions:
 {num_questions}
 
 
-Return ONLY JSON.
+Question types:
+{question_types if question_types else self.QUESTION_TYPES}
+
+
+Return ONLY valid JSON.
 
 
 Format:
 
+
 {{
-
 "quiz_title":"",
-
 "topic":"",
-
 "difficulty":"",
-
 "questions":[
 
 {{
-
 "id":1,
-
 "type":"mcq",
-
 "question":"",
-
 "options":[
-
 "",
-
 "",
-
 "",
-
 ""
-
 ],
-
 "correct_answer":"",
-
 "explanation":""
-
 }}
 
 ]
@@ -162,7 +174,7 @@ Format:
 """
 
 
-            response=self.client.generate_structured_content(
+            response = self.client.generate_structured_content(
 
                 prompt,
 
@@ -173,10 +185,12 @@ Format:
             )
 
 
-            quiz=self._convert_to_dict(response)
+            quiz = self._convert_to_dict(response)
 
 
-            logger.info("✅ Quiz generated")
+            logger.info(
+                "✅ Quiz generated"
+            )
 
 
             return quiz
@@ -196,6 +210,7 @@ Format:
 
 
 
+
     def generate_quiz_from_text(
             self,
             text:str,
@@ -204,12 +219,10 @@ Format:
             difficulty="medium"
     ):
 
-
         try:
 
 
             Validators.is_non_empty_string(text)
-
 
 
             prompt=f"""
@@ -220,31 +233,22 @@ Create quiz only from this content:
 {text}
 
 
-
 Create {num_questions} questions.
 
 
-Return JSON:
+Return ONLY JSON.
 
 
 {{
-
 "questions":[
 
 {{
-
 "id":1,
-
 "type":"mcq",
-
 "question":"",
-
 "options":[],
-
 "correct_answer":"",
-
 "explanation":""
-
 }}
 
 ]
@@ -254,7 +258,7 @@ Return JSON:
 """
 
 
-            response=self.client.generate_structured_content(
+            response = self.client.generate_structured_content(
 
                 prompt,
 
@@ -263,7 +267,6 @@ Return JSON:
                 temperature=0.6
 
             )
-
 
 
             return self._convert_to_dict(response)
@@ -293,7 +296,7 @@ Return JSON:
     ):
 
 
-        text=DocumentProcessor.process_document(
+        text = DocumentProcessor.process_document(
 
             file_path,
 
@@ -351,21 +354,16 @@ Return JSON:
 
 
 {{
-
 "is_correct":true,
-
 "score":100,
-
 "feedback":"",
-
 "explanation":""
-
 }}
 
 """
 
 
-        response=self.client.generate_structured_content(
+        response = self.client.generate_structured_content(
 
             prompt,
 
@@ -406,9 +404,7 @@ Answer:
 {answer}
 
 
-
 Give detailed explanation.
-
 
 """
 
@@ -427,10 +423,10 @@ Give detailed explanation.
     ):
 
 
-        total_questions=len(results)
+        total_questions = len(results)
 
 
-        correct_answers=sum(
+        correct_answers = sum(
 
             1
 
@@ -447,12 +443,10 @@ Give detailed explanation.
 
 
 
-        percentage=(
+        percentage = (
 
             correct_answers /
-
             total_questions *
-
             100
 
             if total_questions
@@ -467,22 +461,18 @@ Give detailed explanation.
 
 
             "total_questions":
-
                 total_questions,
 
 
             "correct_answers":
-
                 correct_answers,
 
 
             "incorrect_answers":
-
-                total_questions-correct_answers,
+                total_questions - correct_answers,
 
 
             "percentage":
-
                 round(
                     percentage,
                     2
@@ -490,26 +480,22 @@ Give detailed explanation.
 
 
             "score":
-
                 correct_answers,
 
 
             "grade":
-
                 self._get_grade(
                     percentage
                 ),
 
 
-
             "performance":
-
                 self._get_performance_message(
                     percentage
                 )
 
-
         }
+
 
 
 
@@ -519,25 +505,19 @@ Give detailed explanation.
     @staticmethod
     def _get_grade(score):
 
-
         if score >= 90:
             return "A"
 
-
-        elif score >=80:
+        elif score >= 80:
             return "B"
 
-
-        elif score>=70:
+        elif score >= 70:
             return "C"
 
-
-        elif score>=60:
+        elif score >= 60:
             return "D"
 
-
         else:
-
             return "F"
 
 
@@ -549,25 +529,24 @@ Give detailed explanation.
     @staticmethod
     def _get_performance_message(score):
 
-
-        if score>=90:
+        if score >= 90:
 
             return "🌟 Excellent! Outstanding performance!"
 
 
-        elif score>=80:
+        elif score >= 80:
 
             return "✅ Great! Very good understanding!"
 
 
-        elif score>=70:
+        elif score >= 70:
 
             return "👍 Good! Keep practicing!"
 
 
-        elif score>=60:
+        elif score >= 60:
 
-            return "📚 Fair. Review and improve."
+            return "📚 Fair. Review and improve!"
 
 
         else:
