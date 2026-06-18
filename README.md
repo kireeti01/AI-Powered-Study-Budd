@@ -5,7 +5,7 @@ An AI-powered learning assistant that helps students understand complex concepts
 ## 🚀 Live Demo
 
 🌐 **Live Application:**  
-https://ai-powered-study-buddy-z8huccouu8ukxhm99tfu6k.streamlit.app/
+https://ai-powered-study-buddy-wbqvegffgyrw4leummbruc.streamlit.app/
 
 ## 📂 GitHub Repository
 
